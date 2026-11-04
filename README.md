@@ -1,36 +1,27 @@
-# CardShark (v3.8)
+# CardShark (v4.3)
 
-**CardShark** is a custom Windower 4 addon for *Final Fantasy XI* designed specifically for **Escutcheon** quest progression. It dynamically monitors incoming network packets to track, display, and persist Escutcheon Crest Card drops by mob name and zone in real time.
+**CardShark** is a custom Windower 4 Lua addon for *Final Fantasy XI* designed for Escutcheon crafters. It parses live incoming chat logs (`You find a [Item] on the [Mob].`) to instantly track, log, and display Crest Card drops and their corresponding monster sources on a clean, draggable onscreen overlay.
 
 ---
 
 ## Features
 
-- **Dynamic Packet Sniffing:** Tracks incoming item drops (`0x020`) and links them directly to recent mob action/defeat events (`0x028`).
-- **Cleave & AOE Ready:** Features a sliding memory queue buffer (`recent_kills`) that retains up to 5 recently defeated mobs with high-precision timestamps, ensuring accurate mob attribution even during rapid multi-mob kills or fast-paced AOE pulls.
-- **Onscreen Draggable Window:** Displays a real-time UI overlay showing logged card drops for your current zone.
-- **Elemental Color Coding:** Color-codes both card names and mob names according to their elemental affinity:
-  - <font color="#FF5050">**Fire Crest Card**</font>: Red (`\cs(255,80,80)`)
-  - <font color="#FFFF64">**Earth Crest Card**</font>: Yellow (`\cs(255,255,100)`)
-  - <font color="#C864FF">**Lightning Crest Card**</font>: Purple (`\cs(200,100,255)`)
-  - <font color="#64FF64">**Wind Crest Card**</font>: Green (`\cs(100,255,100)`)
-  - <font color="#FFFFFF">**Light Crest Card**</font>: White (`\cs(255,255,255)`)
-  - <font color="#A0A0A0">**Dark Crest Card**</font>: Gray (`\cs(160,160,160)`)
-  - <font color="#508CFF">**Water Crest Card**</font>: Blue (`\cs(80,140,255)`)
-  - <font color="#82DCFF">**Ice Crest Card**</font>: Light Blue (`\cs(130,220,255)`)
-- **Zone Filtering:** Automatically filters the UI overlay to reflect only drops for your active zone.
-- **Persistent Storage:** Automatically writes and updates discovered drop data to `CardShark_Data.lua`. Data persists across game sessions.
+* **Direct Chat-Log Parsing:** Automatically reads in-game drop messages to instantly pair Crest Cards with their exact monster source, eliminating packet queue errors and "Unknown Mob" entries during cleave and AOE farming.
+* **Grouped Mob Display:** Combines multiple monster sources for the same card type into a clean, single-line comma-separated list (e.g., `Wind Crest Card : Bat, Hippogryph, Umbril`).
+* **Elementally Color-Coded Display:** Both card names and their associated monster lists automatically render in matching elemental colors (Fire=Red, Earth=Yellow, Lightning=Purple, Wind=Green, Light=White, Dark=Gray, Water=Blue, Ice=Light Blue).
+* **Zone-Aware Filtering:** The onscreen overlay automatically filters and displays only the card drops relevant to your active zone.
+* **Persistent Local Database:** Automatically saves all discovered drop associations to `CardShark_Data.lua` so your data persists across game sessions.
 
 ---
 
 ## Installation
 
-1. Create a folder named `CardShark` inside your Windower 4 addons directory:
+1. Navigate to your Windower addons directory:
    ```text
-   Windower4/addons/CardShark/
+   Windower4/addons/
    ```
-2. Place `CardShark.lua` inside the `CardShark` folder.
-3. (Optional) Place an existing `CardShark_Data.lua` file inside the folder if migrating existing drop data.
+2. Create a new folder named **`CardShark`**.
+3. Place **`CardShark.lua`** inside that folder.
 4. Load the addon in-game:
    ```text
    //lua load cardshark
@@ -38,16 +29,12 @@
 
 ---
 
-## Usage & Commands
+## Commands
 
-CardShark runs automatically in the background once loaded. You can interact with the addon using the `//cardshark` or `//cs` command alias.
-
-| Command | Description |
-| :--- | :--- |
-| `//cs` | Refreshes and displays the overlay window for your current zone. |
-| `//cs show` | Forces the overlay window to display. |
-| `//cs hide` | Hides the overlay window. |
-| `//cs help` | Displays available command options in the chat log. |
+* **`//cs`** or **`//cardshark`** — Refreshes and displays the overlay window for your current zone.
+* **`//cs show`** — Displays the overlay window.
+* **`//cs hide`** — Hides the overlay window.
+* **`//cs help`** — Displays command help in the chat window.
 
 ---
 
