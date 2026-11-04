@@ -1,6 +1,6 @@
 # CardShark (v4.3)
 
-**CardShark** is a custom Windower 4 Lua addon for *Final Fantasy XI* designed for Escutcheon crafters. It parses live incoming chat logs (`You find a [Item] on the [Mob].`) to instantly track, log, and display Crest Card drops and their corresponding monster sources on a clean, draggable onscreen overlay.
+**CardShark** is a custom Windower 4 Lua addon for *Final Fantasy XI* designed for Escutcheon crafters. It parses live incoming chat logs to instantly track, log, and display Crest Card drops and their corresponding monster sources on a clean, draggable onscreen overlay.
 
 ---
 
