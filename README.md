@@ -7,7 +7,7 @@
 ## Features
 
 * **Direct Chat-Log Parsing:** Automatically reads in-game drop messages to instantly pair Crest Cards with their exact monster source, eliminating packet queue errors and "Unknown Mob" entries during cleave and AOE farming.
-* **Grouped Mob Display:** Combines multiple monster sources for the same card type into a clean, single-line comma-separated list (e.g., `Wind Crest Card : Bat, Hippogryph, Umbril`).
+* **Grouped Mob Display:** Combines multiple monster sources for the same card type into a clean, single-line comma-separated list (e.g., `Wind Crest Card : Bat, Hippogryph`).
 * **Elementally Color-Coded Display:** Both card names and their associated monster lists automatically render in matching elemental colors (Fire=Red, Earth=Yellow, Lightning=Purple, Wind=Green, Light=White, Dark=Gray, Water=Blue, Ice=Light Blue).
 * **Zone-Aware Filtering:** The onscreen overlay automatically filters and displays only the card drops relevant to your active zone.
 * **Persistent Local Database:** Automatically saves all discovered drop associations to `CardShark_Data.lua` so your data persists across game sessions.
