@@ -1,7 +1,7 @@
 CardShark (v3.8)
 CardShark is a custom Windower 4 addon for Final Fantasy XI designed specifically for Escutcheon quest progression. It dynamically monitors incoming network packets to track, display, and persist Escutcheon Crest Card drops by mob name and zone in real time.
 
-Features
+Features:
 Dynamic Packet Sniffing: Tracks incoming item drops (0x020) and links them directly to recent mob action/defeat events (0x028).
 Cleave & AOE Ready: Features a sliding memory queue buffer (recent_kills) that retains up to 5 recently defeated mobs with high-precision timestamps, ensuring accurate mob attribution even during rapid multi-mob kills or fast-paced AOE pulls.
 Onscreen Draggable Window: Displays a real-time UI overlay showing logged card drops for your current zone.
