@@ -1,6 +1,6 @@
 _addon.name = 'CardShark'
 _addon.author = 'Womack'
-_addon.version = '3.8'
+_addon.version = '4.4'
 _addon.commands = {'cardshark', 'cs'}
 
 require('luau')
@@ -73,29 +73,32 @@ local function save_database()
     data_file:write(str)
 end
 
--- Recent Kill History Queue (holds last 5 defeated mob names with timestamps)
+-- Recent Kill History Queue for Packet Fallback
 local recent_kills = {}
 
 local function add_recent_kill(mob_name)
+    if not mob_name or mob_name == '' or mob_name == 'Unknown Mob' then return end
+    if #recent_kills > 0 and recent_kills[1].name == mob_name and (os.clock() - recent_kills[1].time < 1) then
+        return
+    end
     table.insert(recent_kills, 1, {name = mob_name, time = os.clock()})
-    if #recent_kills > 5 then
+    if #recent_kills > 15 then
         table.remove(recent_kills)
     end
 end
 
-local function get_most_recent_mob()
-    if #recent_kills > 0 and (os.clock() - recent_kills[1].time < 10) then
+local function get_packet_mob()
+    if #recent_kills > 0 and (os.clock() - recent_kills[1].time < 12) then
         return recent_kills[1].name
     end
-    -- Fallback to current target if no recent death recorded
-    local current_target = windower.ffxi.get_mob_by_target('t')
+    local current_target = windower.ffxi.get_mob_by_target('t') or windower.ffxi.get_mob_by_target('st')
     if current_target and current_target.name and current_target.name ~= '' then
         return current_target.name
     end
     return "Unknown Mob"
 end
 
--- Update Draggable Text Window
+-- Update Draggable Text Window (Grouped Display)
 local function update_display()
     local zone_info = windower.ffxi.get_info()
     if not zone_info or not zone_info.zone or not res.zones[zone_info.zone] then 
@@ -113,9 +116,15 @@ local function update_display()
     else
         for card, mobs in pairs(zone_data) do
             local color_code = color_map[card] or '\\cs(200,200,200)'
+            
+            local mob_list = {}
             for mob_name, _ in pairs(mobs) do
-                text_str = text_str .. string.format('%s%-18s\\cr : %s%s\\cr\n', color_code, card, color_code, mob_name)
+                table.insert(mob_list, mob_name)
             end
+            table.sort(mob_list)
+
+            local mobs_string = table.concat(mob_list, ', ')
+            text_str = text_str .. string.format('%s%-18s\\cr : %s%s\\cr\n', color_code, card, color_code, mobs_string)
         end
     end
 
@@ -125,6 +134,8 @@ end
 
 -- Core Data Registration
 local function register_drop(zone_name, card_name, mob_name)
+    if not card_name or not mob_name or mob_name == '' then return end
+    
     drop_database[zone_name] = drop_database[zone_name] or {}
     drop_database[zone_name][card_name] = drop_database[zone_name][card_name] or {}
 
@@ -137,15 +148,30 @@ local function register_drop(zone_name, card_name, mob_name)
     update_display()
 end
 
--- Live Network Listener
+-- METHOD 1: Direct Chat Log Parser ("You find a [Item] on the [Mob].")
+windower.register_event('incoming text', function(original, modified, mode)
+    local clean_text = original:strip_format()
+    local item_found, mob_found = clean_text:match("You find a ([%a%s]+) on the ([%a%s]+)%.$")
+    
+    if item_found and mob_found and item_found:find('Crest Card') then
+        local zone_info = windower.ffxi.get_info()
+        if zone_info and res.zones[zone_info.zone] then
+            local zone_name = res.zones[zone_info.zone].en
+            register_drop(zone_name, item_found, mob_found)
+        end
+    end
+end)
+
+-- METHOD 2: Network Packet Watcher (0x028 Death Action + 0x020 Item Drop Pool)
 windower.register_event('incoming chunk', function(id, data)
     if id == 0x028 then
         local p = packets.parse('incoming', data)
-        -- Category 11 handles mob defeat / death animation states
-        if p and p.Category == 11 and p.Target and p.Target > 0 then
-            local mob = windower.ffxi.get_mob_by_id(p.Target)
-            if mob and mob.name and mob.name ~= '' then
-                add_recent_kill(mob.name)
+        if p and p.Target and p.Target > 0 then
+            if p.Category == 11 or p.Category == 3 or p.Category == 4 or p.Category == 1 then
+                local mob = windower.ffxi.get_mob_by_id(p.Target)
+                if mob and mob.name and mob.name ~= '' and mob.is_npc then
+                    add_recent_kill(mob.name)
+                end
             end
         end
     elseif id == 0x020 then
@@ -158,9 +184,12 @@ windower.register_event('incoming chunk', function(id, data)
                     local card_name = item_info.en
                     local zone_info = windower.ffxi.get_info()
                     local zone_name = (zone_info and res.zones[zone_info.zone]) and res.zones[zone_info.zone].en or "Unknown Zone"
-                    local mob_name = get_most_recent_mob()
+                    local mob_name = get_packet_mob()
 
-                    register_drop(zone_name, card_name, mob_name)
+                    -- Only register via packet if chat parser didn't already lock it down instantly
+                    if mob_name ~= "Unknown Mob" then
+                        register_drop(zone_name, card_name, mob_name)
+                    end
                 end
             end
         end
